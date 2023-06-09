@@ -2,7 +2,9 @@ package training.android.timertraining;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.preference.CheckBoxPreference;
 import androidx.preference.EditTextPreference;
@@ -13,7 +15,7 @@ import androidx.preference.PreferenceScreen;
 
 public class SettingFragment
         extends PreferenceFragmentCompat
-        implements SharedPreferences.OnSharedPreferenceChangeListener {
+        implements SharedPreferences.OnSharedPreferenceChangeListener, Preference.OnPreferenceChangeListener {
     @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         addPreferencesFromResource(R.xml.timer_preferences);
@@ -27,6 +29,8 @@ public class SettingFragment
                 setPreferenceLabel(preference, value);
             }
         }
+        Preference preference = findPreference("default_interval");
+        preference.setOnPreferenceChangeListener(this);
     }
 
     private void setPreferenceLabel(Preference preference, String value) {
@@ -60,5 +64,19 @@ public class SettingFragment
     public void onDestroy() {
         super.onDestroy();
         getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    public boolean onPreferenceChange(@NonNull Preference preference, Object newValue) {
+        if(preference.getKey().equals("default_interval")){
+            String defaultIntervalStr = (String) newValue;
+            try {
+                Integer.parseInt(defaultIntervalStr);
+            } catch (NumberFormatException e){
+                Toast.makeText(getContext(), "Please input number", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        }
+        return true;
     }
 }
